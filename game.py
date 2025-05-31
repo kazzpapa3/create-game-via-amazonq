@@ -284,14 +284,31 @@ class Game:
                 self.screen.blit(text, text_rect)
         
         # 時間切れ
-        if self.current_time <= 0 and self.selected_answer is None:
-            self.selected_answer = ""
-            self.result_correct = False
-            self.result_time = current_time
-            self.combo = 0
+        if self.current_time <= 0:
+            # まだ選択されていない場合のみ初期化処理を行う
+            if self.selected_answer is None:
+                self.selected_answer = ""
+                self.result_correct = False
+                self.result_time = current_time
+                self.combo = 0
+                
+                # 正解の選択肢を強調表示するために、選択済み状態にする
+                for i, option in enumerate(self.current_options):
+                    if option == self.correct_answer:
+                        pygame.draw.rect(self.screen, GREEN, pygame.Rect(100, 400 + i * 40, self.width - 200, 30))
+            
+            # 時間切れの表示
+            time_up_text = self.title_font.render("時間切れ！", True, RED)
+            time_up_rect = time_up_text.get_rect(center=(self.width // 2, 300))
+            self.screen.blit(time_up_text, time_up_rect)
+            
+            # 正解の表示
+            correct_text = self.font.render(f"正解: {self.correct_answer}", True, BLACK)
+            correct_rect = correct_text.get_rect(center=(self.width // 2, 340))
+            self.screen.blit(correct_text, correct_rect)
             
             # 時間切れの場合も結果表示後に次の問題へ進む
-            if current_time - self.result_time >= self.result_display_time:
+            if current_time - self.result_time >= self.result_display_time * 2:  # 表示時間を2倍に延長
                 self.next_question()
     
     def game_over_screen(self):
